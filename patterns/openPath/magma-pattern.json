@@ -1,11 +1,11 @@
 {
-  "name": "water-pattern",
-  "element": "water",
-  "description": "Motif source Eau défini proportionnellement à une longueur de référence length = L.",
+  "name": "magma-pattern",
+  "element": "magma",
+  "description": "Motif source Magmat défini proportionnellement à une longueur de référence length = L.",
   "parameters": {
     "length": {
       "symbol": "L",
-      "description": "Longueur de référence du motif M0-M7."
+      "description": "Longueur de référence du motif M0-M8."
     },
     "offsetX": {
       "symbol": "X0",
@@ -21,7 +21,7 @@
     "y": "offsetY - normalizedY * length"
   },
   "origin": "M0",
-  "endPoint": "M7",
+  "endPoint": "M8",
   "points": [
     {
       "id": "M0",
@@ -35,59 +35,68 @@
     {
       "id": "M1",
       "normalized": [
-        "1/8",
-        "-1/8"
+        "1/5",
+        "1/4"
       ],
-      "x": "offsetX + length / 8",
-      "y": "offsetY + length / 8"
+      "x": "offsetX + length / 5",
+      "y": "offsetY - length / 4"
     },
     {
       "id": "M2",
       "normalized": [
         "1/4",
-        "-3/8"
+        "1/8"
       ],
       "x": "offsetX + length / 4",
-      "y": "offsetY + 3 * length / 8"
+      "y": "offsetY - length / 8"
     },
     {
       "id": "M3",
       "normalized": [
-        "1/2",
-        "-1/2"
+        "3/8",
+        "1/4"
       ],
-      "x": "offsetX + length / 2",
-      "y": "offsetY + length / 2"
+      "x": "offsetX + 3 * length / 8",
+      "y": "offsetY - length / 4"
     },
     {
       "id": "M4",
       "normalized": [
-        "5/8",
-        "-1/4"
+        "1/4",
+        "3/8"
       ],
-      "x": "offsetX + 5 * length / 8",
-      "y": "offsetY + length / 4"
+      "x": "offsetX + length / 4",
+      "y": "offsetY - 3 * length / 8"
     },
     {
       "id": "M5",
       "normalized": [
-        "3/4",
-        "-1/8"
+        "3/8",
+        "1/2"
       ],
-      "x": "offsetX + 3 * length / 4",
-      "y": "offsetY + length / 8"
+      "x": "offsetX + 3 * length / 8",
+      "y": "offsetY - length / 2"
     },
     {
       "id": "M6",
       "normalized": [
-        "7/8",
-        "-1/8"
+        "3/4",
+        "1/8"
       ],
-      "x": "offsetX + 7 * length / 8",
-      "y": "offsetY + length / 8"
+      "x": "offsetX + 3 * length / 4",
+      "y": "offsetY - length / 8"
     },
     {
       "id": "M7",
+      "normalized": [
+        "7/8",
+        "1/4"
+      ],
+      "x": "offsetX + 7 * length / 8",
+      "y": "offsetY - length / 4"
+    },
+    {
+      "id": "M8",
       "normalized": [
         "1",
         "0"
@@ -124,6 +133,10 @@
     [
       "M6",
       "M7"
+    ],
+    [
+      "M7",
+      "M8"
     ]
   ]
 }

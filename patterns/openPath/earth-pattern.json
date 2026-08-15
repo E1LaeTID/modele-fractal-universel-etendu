@@ -1,7 +1,7 @@
 {
-  "name": "water-pattern",
-  "element": "water",
-  "description": "Motif source Eau défini proportionnellement à une longueur de référence length = L.",
+  "name": "earth-pattern",
+  "element": "earth",
+  "description": "Motif source Terre défini proportionnellement à une longueur de référence length = L.",
   "parameters": {
     "length": {
       "symbol": "L",
@@ -35,56 +35,56 @@
     {
       "id": "M1",
       "normalized": [
-        "1/8",
-        "-1/8"
+        "1/6",
+        "1/4"
       ],
-      "x": "offsetX + length / 8",
-      "y": "offsetY + length / 8"
+      "x": "offsetX + length / 6",
+      "y": "offsetY - length / 4"
     },
     {
       "id": "M2",
       "normalized": [
         "1/4",
-        "-3/8"
+        "3/8"
       ],
       "x": "offsetX + length / 4",
-      "y": "offsetY + 3 * length / 8"
+      "y": "offsetY - 3 * length / 8"
     },
     {
       "id": "M3",
       "normalized": [
-        "1/2",
-        "-1/2"
+        "1/3",
+        "1/4"
       ],
-      "x": "offsetX + length / 2",
-      "y": "offsetY + length / 2"
+      "x": "offsetX + length / 3",
+      "y": "offsetY - length / 4"
     },
     {
       "id": "M4",
       "normalized": [
-        "5/8",
-        "-1/4"
+        "2/3",
+        "1/4"
       ],
-      "x": "offsetX + 5 * length / 8",
-      "y": "offsetY + length / 4"
+      "x": "offsetX + 2 * length / 3",
+      "y": "offsetY - length / 4"
     },
     {
       "id": "M5",
       "normalized": [
         "3/4",
-        "-1/8"
+        "3/8"
       ],
       "x": "offsetX + 3 * length / 4",
-      "y": "offsetY + length / 8"
+      "y": "offsetY - 3 * length / 8"
     },
     {
       "id": "M6",
       "normalized": [
-        "7/8",
-        "-1/8"
+        "5/6",
+        "1/4"
       ],
-      "x": "offsetX + 7 * length / 8",
-      "y": "offsetY + length / 8"
+      "x": "offsetX + 5 * length / 6",
+      "y": "offsetY - length / 4"
     },
     {
       "id": "M7",
