@@ -1,0 +1,120 @@
+{
+  "name": "heptagon-closed-path",
+  "closedPathType": "heptagon",
+  "description": "Contour fermé heptagon régulier défini proportionnellement à une longueur de côté commune length = L.",
+  "parameters": {
+    "length": {
+      "symbol": "L",
+      "description": "Longueur commune à tous les segments du polygone régulier."
+    },
+    "offsetX": {
+      "symbol": "X0",
+      "description": "Translation horizontale appliquée depuis l'origine M0."
+    },
+    "offsetY": {
+      "symbol": "Y0",
+      "description": "Translation verticale appliquée depuis l'origine M0."
+    }
+  },
+  "screenTransform": {
+    "x": "offsetX + normalizedX * length",
+    "y": "offsetY - normalizedY * length"
+  },
+  "origin": "M0",
+  "endPoint": "M0",
+  "points": [
+    {
+      "id": "M0",
+      "normalized": [
+        "0",
+        "0"
+      ],
+      "x": "offsetX",
+      "y": "offsetY"
+    },
+    {
+      "id": "M1",
+      "normalized": [
+        "1",
+        "0"
+      ],
+      "x": "offsetX + length",
+      "y": "offsetY"
+    },
+    {
+      "id": "M2",
+      "normalized": [
+        "1.623489801859",
+        "0.781831482468"
+      ],
+      "x": "offsetX + 1.623489801859 * length",
+      "y": "offsetY - 0.781831482468 * length"
+    },
+    {
+      "id": "M3",
+      "normalized": [
+        "1.400968867902",
+        "1.75675939465"
+      ],
+      "x": "offsetX + 1.400968867902 * length",
+      "y": "offsetY - 1.75675939465 * length"
+    },
+    {
+      "id": "M4",
+      "normalized": [
+        "0.5",
+        "2.190643133767"
+      ],
+      "x": "offsetX + 0.5 * length",
+      "y": "offsetY - 2.190643133767 * length"
+    },
+    {
+      "id": "M5",
+      "normalized": [
+        "-0.400968867902",
+        "1.75675939465"
+      ],
+      "x": "offsetX + -0.400968867902 * length",
+      "y": "offsetY - 1.75675939465 * length"
+    },
+    {
+      "id": "M6",
+      "normalized": [
+        "-0.623489801859",
+        "0.781831482468"
+      ],
+      "x": "offsetX + -0.623489801859 * length",
+      "y": "offsetY - 0.781831482468 * length"
+    }
+  ],
+  "segments": [
+    [
+      "M0",
+      "M1"
+    ],
+    [
+      "M1",
+      "M2"
+    ],
+    [
+      "M2",
+      "M3"
+    ],
+    [
+      "M3",
+      "M4"
+    ],
+    [
+      "M4",
+      "M5"
+    ],
+    [
+      "M5",
+      "M6"
+    ],
+    [
+      "M6",
+      "M0"
+    ]
+  ]
+}

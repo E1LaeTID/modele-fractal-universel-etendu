@@ -1,7 +1,7 @@
 {
-  "name": "triangle-closed-path",
-  "closedPathType": "triangle",
-  "description": "Contour fermé triangle régulier défini proportionnellement à une longueur de côté commune length = L.",
+  "name": "hexagon-closed-path",
+  "closedPathType": "hexagon",
+  "description": "Contour fermé hexagon régulier défini proportionnellement à une longueur de côté commune length = L.",
   "parameters": {
     "length": {
       "symbol": "L",
@@ -44,10 +44,37 @@
     {
       "id": "M2",
       "normalized": [
-        "0.5",
+        "1.5",
         "0.866025403784"
       ],
-      "x": "offsetX + 0.5 * length",
+      "x": "offsetX + 1.5 * length",
+      "y": "offsetY - 0.866025403784 * length"
+    },
+    {
+      "id": "M3",
+      "normalized": [
+        "1",
+        "1.732050807569"
+      ],
+      "x": "offsetX + length",
+      "y": "offsetY - 1.732050807569 * length"
+    },
+    {
+      "id": "M4",
+      "normalized": [
+        "0",
+        "1.732050807569"
+      ],
+      "x": "offsetX",
+      "y": "offsetY - 1.732050807569 * length"
+    },
+    {
+      "id": "M5",
+      "normalized": [
+        "-0.5",
+        "0.866025403784"
+      ],
+      "x": "offsetX + -0.5 * length",
       "y": "offsetY - 0.866025403784 * length"
     }
   ],
@@ -62,6 +89,18 @@
     ],
     [
       "M2",
+      "M3"
+    ],
+    [
+      "M3",
+      "M4"
+    ],
+    [
+      "M4",
+      "M5"
+    ],
+    [
+      "M5",
       "M0"
     ]
   ]

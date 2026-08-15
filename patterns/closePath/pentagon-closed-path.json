@@ -1,7 +1,7 @@
 {
-  "name": "triangle-closed-path",
-  "closedPathType": "triangle",
-  "description": "Contour fermé triangle régulier défini proportionnellement à une longueur de côté commune length = L.",
+  "name": "pentagon-closed-path",
+  "closedPathType": "pentagon",
+  "description": "Contour fermé pentagon régulier défini proportionnellement à une longueur de côté commune length = L.",
   "parameters": {
     "length": {
       "symbol": "L",
@@ -44,11 +44,29 @@
     {
       "id": "M2",
       "normalized": [
+        "1.309016994375",
+        "0.951056516295"
+      ],
+      "x": "offsetX + 1.309016994375 * length",
+      "y": "offsetY - 0.951056516295 * length"
+    },
+    {
+      "id": "M3",
+      "normalized": [
         "0.5",
-        "0.866025403784"
+        "1.538841768588"
       ],
       "x": "offsetX + 0.5 * length",
-      "y": "offsetY - 0.866025403784 * length"
+      "y": "offsetY - 1.538841768588 * length"
+    },
+    {
+      "id": "M4",
+      "normalized": [
+        "-0.309016994375",
+        "0.951056516295"
+      ],
+      "x": "offsetX + -0.309016994375 * length",
+      "y": "offsetY - 0.951056516295 * length"
     }
   ],
   "segments": [
@@ -62,6 +80,14 @@
     ],
     [
       "M2",
+      "M3"
+    ],
+    [
+      "M3",
+      "M4"
+    ],
+    [
+      "M4",
       "M0"
     ]
   ]
