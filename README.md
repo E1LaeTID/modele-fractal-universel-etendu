@@ -1,223 +1,150 @@
-# Modèle fractal universel étendu
+# Modèle fractal universel étendu — cycles entre motifs ouverts et contours fermés
 
-Moteur C++ de construction géométrique récursive combinant des **motifs ouverts**, des **contours fermés**, une réduction fermé-vers-ouvert et une rétrogradation adaptative des niveaux de substitution.
+Le **modèle fractal universel étendu** est un moteur C++ de construction géométrique récursive. Il orchestre deux listes — des motifs ouverts et des contours fermés — puis transforme le résultat de chaque cycle en source du cycle suivant.
 
-Ce repository prolonge le **Modèle fractal universel** : le modèle initial remplace chaque segment d'une chaîne par une transformation affine d'un même motif ; cette version étendue orchestre deux listes de géométries et fait du résultat d'un cycle la source du cycle suivant.
+Il prolonge le [modèle fractal universel initial](https://github.com/E1LaeTID/Un-modele-fractale-universel), qui applique un même motif normalisé à chaque segment d'un chemin.
 
-> Statut : prototype expérimental en cours de stabilisation. Le moteur fonctionne avec C++17, SFML 3 et des motifs décrits en JSON.
+> English summary: an experimental C++ geometry engine that cycles through open patterns and closed contours, reduces closed results back to open paths and reuses them as inputs for the next recursive stage.
 
-![Architecture du modèle fractal universel étendu avec projection récursive, réduction de contour et rendu indexé](docs/images/schema-architecture-modele-fractal-universel-etendu.png)
+**Technologies :** C++17, CMake, SFML 3, JSON  
+**Statut :** prototype expérimental en cours de stabilisation
 
-## Objectifs
+![Architecture du modèle fractal universel étendu](docs/images/schema-architecture-modele-fractal-universel-etendu.png)
 
-Le projet cherche à séparer quatre responsabilités :
+## Ce que la version étendue ajoute
 
-1. décrire les géométries indépendamment du rendu ;
-2. projeter un motif ouvert sur les segments d'un chemin cible ;
-3. convertir une géométrie fermée en nouveau motif ouvert ;
-4. contrôler la croissance récursive par rétrogradation structurelle.
+| Modèle initial | Modèle étendu |
+|---|---|
+| Un motif ouvert | Une liste ordonnée de motifs ouverts |
+| Un chemin cible | Une liste ordonnée de contours fermés |
+| Substitution répétée | Enchaînement de cycles différents |
+| Résultat final affiché | Résultat réduit et réinjecté |
+| Croissance récursive | Rétrogradation structurelle contrôlée |
 
-Cette séparation prépare plusieurs extensions : génération de SVG, export de maillages, reconstruction de sections 3D, intégration Blender et visualisation Three.js.
+Le modèle étendu sépare quatre opérations :
 
-## Du modèle initial au modèle étendu
+1. projeter un motif ouvert sur un contour ;
+2. obtenir une géométrie fermée substituée ;
+3. extraire et normaliser une moitié ouverte ;
+4. rétrograder la récursion avant le cycle suivant.
 
-### Modèle fractal universel
-
-Le modèle initial suit trois opérations :
+## Les deux listes
 
 ```text
-motif ouvert normalisé
-        ↓
-substitution de chaque segment
-        ↓
-nouvelle chaîne de segments
-        ↓
-itération récursive
+OpenPatterns =
+[Eau, Feu, Vent, Bois, Terre, Glace, Magmat, Foudre]
+
+ClosedPaths =
+[Triangle, Carré, Pentagone, Hexagone,
+ Heptagone, Octogone, Ennéagone, Décagone]
 ```
 
-Un point local `P(x, y)` est projeté sur un segment cible `[A, B]` à l'aide de la base :
+À chaque cycle, un motif ouvert et un contour fermé sont combinés selon leur position dans les listes.
+
+## Transformation affine fondamentale
+
+Pour un segment cible `[A, B]` :
 
 ```text
 U = B - A
 V = (-Uy, Ux)
-```
-
-La transformation affine est :
-
-```text
 P' = A + xU + yV
 ```
 
-Le motif source commence en `(0,0)` et se termine en `(1,0)`. Son origine est donc projetée sur `A` et son dernier point sur `B`.
+Le motif local commence en `(0,0)` et se termine en `(1,0)`. Son origine est projetée sur `A` et son extrémité sur `B`.
 
-### Version étendue
-
-La version étendue utilise deux collections ordonnées :
+## Pipeline d'un cycle
 
 ```text
-OpenPatterns = [Eau, Feu, Vent, Bois, Terre, Glace, Magma, Foudre]
-
-ClosedPaths = [
-    Triangle,
-    Carré,
-    Pentagone,
-    Hexagone,
-    Heptagone,
-    Octogone,
-    Ennéagone,
-    Décagone
-]
+CurrentMotif[n] + ClosedPath[n]
+                ↓
+       substitution géométrique
+                ↓
+        ClosedGeometry[n]
+                ↓
+    extraction d'une moitié ouverte
+                ↓
+           HalfContour[n]
+                ↓
+    rétrogradation de n niveaux
+                ↓
+           ReducedHalf[n]
+                ↓
+ normalisation de (0,0) vers (1,0)
+                ↓
+ substitution par OpenPattern[n+1]
+                ↓
+        CurrentMotif[n+1]
 ```
 
-Le premier motif ouvert remplace les segments du premier contour fermé. La géométrie obtenue est coupée, transformée en chemin ouvert, rétrogradée, puis combinée au motif ouvert suivant.
-
-## Pipeline récursif
-
-Pour un cycle d'indice `n` :
-
-```text
-CurrentMotif[n]
-        +
-ClosedPath[n]
-        ↓
-substitution géométrique
-        ↓
-ClosedGeometry[n]
-        ↓
-extraction de la première moitié
-        ↓
-HalfContour[n]
-        ↓
-rétrogradation de n niveaux
-        ↓
-ReducedHalf[n]
-        ↓
-normalisation entre (0,0) et (1,0)
-        ↓
-substitution par OpenPattern[n + 1]
-        ↓
-CurrentMotif[n + 1]
-```
-
-La récurrence peut être résumée par :
+Formulation compacte :
 
 ```text
 G[n] = Substitute(CurrentMotif[n], ClosedPath[n])
-
 H[n] = Normalize(ExtractHalf(G[n]))
-
 R[n] = Normalize(Rollback(H[n], n))
-
-CurrentMotif[n + 1] = Substitute(OpenPattern[n + 1], R[n])
+CurrentMotif[n+1] = Substitute(OpenPattern[n+1], R[n])
 ```
 
-## Réduction d'un contour fermé
+## Conversion fermé-vers-ouvert
 
-`ContourReducer` convertit la nouvelle géométrie fermée en chemin ouvert.
+`ContourReducer` extrait la première moitié du contour substitué.
 
-Pour un nombre pair de segments, la première moitié est conservée :
+Pour un nombre pair :
 
 ```text
-24 segments fermés
-        ↓
-12 segments ouverts
+24 segments fermés → 12 segments ouverts
 ```
 
-Pour un nombre impair, le nombre pair immédiatement inférieur est utilisé :
+Pour un nombre impair, le segment frontière non appairé est exclu :
 
 ```text
-21 segments fermés
-        ↓
-20 segments appairables
-        ↓
-10 segments ouverts
+21 segments → 20 segments appairables → 10 segments ouverts
 ```
 
-Le segment frontière non appairé est exclu. Le chemin résultant est ensuite normalisé afin que son origine soit `(0,0)` et son dernier point `(1,0)`.
+Le résultat est ensuite normalisé entre `(0,0)` et `(1,0)`.
 
-## Rétrogradation récursive
+## Rétrogradation structurelle
 
-La substitution augmente rapidement le nombre de segments et réduit progressivement la lisibilité des motifs. `RecursionReducer` réalise une dé-substitution structurelle : un groupe complet de segments enfants est remplacé par son segment parent.
+`RecursionReducer` regroupe les segments enfants complets afin de reconstruire leur segment parent.
 
 ```text
-M segments enfants
-        ↓
-1 segment parent
+M segments enfants → 1 segment parent
 ```
 
-La profondeur de rétrogradation suit l'indice du contour fermé :
+La profondeur demandée suit l'indice du contour :
 
-| Contour | Cycle | Niveaux demandés |
-|---|---:|---:|
-| Triangle | 0 | 0 |
-| Carré | 1 | 1 |
-| Pentagone | 2 | 2 |
-| Hexagone | 3 | 3 |
-| Heptagone | 4 | 4 |
-| Octogone | 5 | 5 |
-| Ennéagone | 6 | 6 |
-| Décagone | 7 | 7 |
+| Cycle | Contour | Niveaux demandés |
+|---:|---|---:|
+| 0 | Triangle | 0 |
+| 1 | Carré | 1 |
+| 2 | Pentagone | 2 |
+| 3 | Hexagone | 3 |
+| 4 | Heptagone | 4 |
+| 5 | Octogone | 5 |
+| 6 | Ennéagone | 6 |
+| 7 | Décagone | 7 |
 
-Si une frontière interrompt un groupe de substitution, seuls les groupes complets sont conservés. Si le nombre de niveaux disponibles est inférieur au nombre demandé, le moteur retire uniquement les niveaux encore présents.
-
-Cette opération n'est pas l'inverse analytique de la géométrie. Elle s'appuie sur l'historique des nombres de segments utilisés pendant les substitutions.
+La rétrogradation n'est pas un inverse analytique de la géométrie. Elle utilise l'historique structurel des substitutions et ne reconstruit que les groupes complets disponibles.
 
 ## Architecture C++
 
 | Composant | Responsabilité |
 |---|---|
-| `Point` | Point identifié et coordonnées normalisées |
-| `Segment` | Connectivité entre deux indices de points |
-| `Pattern` | Représentation commune des motifs ouverts et fermés |
-| `PolygonGenerator` | Chargement, tri et validation des polygones réguliers |
-| `Transform` | Translation, rotation, échelle et projection affine |
-| `GeometryMacro` | Substitution d'un motif ouvert sur un chemin cible |
-| `ContourReducer` | Extraction et normalisation d'une moitié ouverte |
-| `RecursionReducer` | Reconstruction des segments parents |
-| `ProjectionEngine` | Orchestration des deux listes et historique des cycles |
-| `Renderer` | Conversion écran et rendu SFML indexé |
+| `Point` | Coordonnées normalisées et identifiant |
+| `Segment` | Connectivité entre deux points |
+| `Pattern` | Représentation des motifs ouverts et fermés |
+| `PolygonGenerator` | Chargement et validation des contours |
+| `Transform` | Projection affine |
+| `GeometryMacro` | Substitution sur un chemin cible |
+| `ContourReducer` | Extraction fermé-vers-ouvert |
+| `RecursionReducer` | Reconstruction des niveaux parents |
+| `ProjectionEngine` | Orchestration des listes et cycles |
+| `Renderer` | Affichage SFML |
 
-## Arborescence
+## Organisation JSON
 
-```text
-modele-fractal-universel-etendu/
-├── includes/
-│   ├── Point.hpp
-│   ├── Segment.hpp
-│   ├── Pattern.hpp
-│   ├── PolygonGenerator.hpp
-│   ├── Transform.hpp
-│   ├── GeometryMacro.hpp
-│   ├── ContourReducer.hpp
-│   ├── RecursionReducer.hpp
-│   ├── ProjectionEngine.hpp
-│   └── Renderer.hpp
-├── source/
-│   ├── main.cpp
-│   ├── Pattern.cpp
-│   ├── PolygonGenerator.cpp
-│   ├── Transform.cpp
-│   ├── GeometryMacro.cpp
-│   ├── ContourReducer.cpp
-│   ├── RecursionReducer.cpp
-│   ├── ProjectionEngine.cpp
-│   └── Renderer.cpp
-├── patterns/
-│   ├── openPath/
-│   └── closePath/
-├── docs/
-│   └── images/
-├── CMakeLists.txt
-├── README.md
-├── LICENSE
-└── .gitignore
-```
-
-## Représentation JSON
-
-Les motifs ouverts et fermés partagent la même organisation : paramètres, transformation écran, origine, points normalisés et segments ordonnés.
-
-Un motif ouvert utilise :
+Motif ouvert :
 
 ```json
 {
@@ -230,7 +157,7 @@ Un motif ouvert utilise :
 }
 ```
 
-Un contour fermé remplace `element` par `closedPathType` :
+Contour fermé :
 
 ```json
 {
@@ -250,100 +177,109 @@ Un contour fermé remplace `element` par `closedPathType` :
 }
 ```
 
-Tous les polygones réguliers suivent les conventions suivantes :
+## Compilation
 
-- `M0` est l'origine locale et le début du parcours ;
-- `M0 → M1` mesure `L` ;
-- les sommets sont parcourus dans le sens antihoraire ;
-- le dernier segment revient sur `M0`.
-
-## Prérequis
+Prérequis actuellement documentés :
 
 - Windows 10 ou 11 ;
-- Visual Studio Code ;
-- extension CMake Tools ;
 - compilateur compatible C++17 ;
+- CMake ;
 - SFML 3.1.0 ;
-- Git pour le chargement de `nlohmann/json` par CMake.
+- Git pour charger `nlohmann/json`.
 
-Le chemin SFML actuellement utilisé dans `CMakeLists.txt` est :
-
-```text
-D:/code/C++/libraries/SFML-3.1.0/lib/cmake/SFML
+```bash
+cmake -S . -B build
+cmake --build build --config Debug
 ```
 
-Adaptez cette valeur si SFML est installé ailleurs.
-
-## Compilation dans Visual Studio Code
-
-Le projet peut être configuré entièrement avec CMake Tools :
-
-```text
-Ctrl + Shift + P
-→ CMake: Configure
-→ CMake: Build
-→ CMake: Run Without Debugging
-```
-
-Après l'ajout ou la suppression d'un fichier dans `CMakeLists.txt`, utilisez :
-
-```text
-CMake: Configure
-CMake: Clean Rebuild
-```
+Le chemin SFML peut devoir être adapté dans `CMakeLists.txt` selon votre installation.
 
 ## Commandes du renderer
 
 | Touche | Action |
 |---|---|
-| `1` | Afficher le contour fermé source |
-| `2` | Afficher la géométrie fermée substituée |
-| `3` | Afficher la moitié extraite et normalisée |
-| `4` | Afficher le motif récursif suivant |
-| `Tab` | Passer à l'état suivant du cycle |
-| `→` ou `Espace` | Passer au cycle suivant |
-| `←` | Revenir au cycle précédent |
+| `1` | Contour fermé source |
+| `2` | Géométrie fermée substituée |
+| `3` | Moitié extraite et normalisée |
+| `4` | Motif récursif suivant |
+| `Tab` | État suivant du cycle |
+| `→` ou `Espace` | Cycle suivant |
+| `←` | Cycle précédent |
 | `A` | Activer ou arrêter l'animation |
 | `R` | Revenir au premier cycle |
-| `Échap` | Fermer la fenêtre |
-
-Le titre de la fenêtre indique le cycle, le motif entrant, le contour fermé et l'état actuellement affiché.
+| `Échap` | Fermer |
 
 ## Limite de sécurité
 
-Le nombre de segments peut croître rapidement. `ProjectionEngine` applique une limite configurable :
+La croissance peut être très rapide. `ProjectionEngine` applique une limite configurable du nombre de segments. Cette limite doit rester active même lorsque la rétrogradation réduit la géométrie.
 
-```cpp
-ProjectionEngine engine(
-    std::move(openPatterns),
-    std::move(closedPaths),
-    2'000'000
-);
-```
+Mesures recommandées :
 
-La rétrogradation adaptative réduit cette croissance, mais la limite reste nécessaire pour éviter une saturation de la mémoire pendant les expérimentations.
+- borner le nombre de segments ;
+- vérifier les groupes avant rétrogradation ;
+- journaliser la taille de chaque cycle ;
+- interrompre proprement une génération excessive ;
+- conserver des jeux de données et graines reproductibles.
+
+## Applications documentées
+
+Le modèle étendu sert de base conceptuelle à plusieurs expérimentations :
+
+- [time2d](https://github.com/E1LaeTID/time2d), pour les structures temporelles polyfractales ;
+- [Carte calorique multilangage](https://github.com/E1LaeTID/carte-calorique-multilangage), pour la cartographie de listes métier ;
+- [ElementChess](https://github.com/E1LaeTID/elementchess-fractal-poc), pour la transformation stochastique d'un jeu de stratégie.
+
+Ces dépôts sont des cas d'application. Ils ne constituent pas des preuves que le modèle convient automatiquement à tous les domaines.
+
+## Questions fréquentes
+
+### Quelle est la différence entre le modèle initial et le modèle étendu ?
+
+Le modèle initial substitue un motif sur des segments. Le modèle étendu orchestre deux listes de géométries, réduit le résultat et le réinjecte dans le cycle suivant.
+
+### Pourquoi utiliser des contours fermés ?
+
+Ils fournissent des supports successifs et clairement identifiables. La conversion en chemin ouvert permet ensuite de produire une nouvelle source normalisée.
+
+### Que signifie rétrograder une récursion ?
+
+Le moteur regroupe des ensembles complets de segments enfants pour retrouver leurs segments parents selon l'historique de génération.
+
+### Le modèle garantit-il l'absence d'intersections ?
+
+Non. La validité dépend des motifs, contours, profondeurs et transformations choisis. Les résultats doivent être contrôlés.
+
+### Pourquoi imposer une limite de segments ?
+
+La substitution peut produire une croissance exponentielle et saturer la mémoire avant que la rétrogradation ne suffise à la contenir.
+
+### Est-ce une théorie mathématique démontrée ?
+
+Le dépôt documente un modèle informatique expérimental et ses invariants de construction. Il ne revendique pas une preuve d'universalité pour tous les systèmes fractals.
+
+### Peut-on utiliser un autre renderer que SFML ?
+
+Oui en principe. Les données JSON et les opérations géométriques sont séparées du rendu, mais un nouvel adaptateur doit être implémenté.
 
 ## Feuille de route
 
-- stabiliser la rétrogradation sur les huit cycles ;
-- ajouter l'affichage distinct de `ReducedHalf` ;
-- enregistrer les statistiques de segments par cycle ;
-- exporter les géométries en SVG ;
-- comparer différentes stratégies de réduction ;
-- relier des sections successives pour produire des maillages 3D ;
-- proposer une implémentation indépendante du renderer SFML.
+- stabiliser les huit cycles ;
+- afficher séparément `ReducedHalf` ;
+- enregistrer les statistiques par cycle ;
+- exporter en SVG ;
+- comparer les stratégies de réduction ;
+- relier des sections pour produire des maillages 3D ;
+- rendre le moteur indépendant du renderer.
 
-## Relation avec le repository initial
+## Statut et écosystème
 
-Ce projet est une extension du repository **Modèle fractal universel**. Le premier repository reste la référence pédagogique pour la substitution affine élémentaire et les implémentations multilangages.
+Prototype C++ expérimental.
 
-Lien à compléter :
-
-```text
-URL_DU_REPOSITORY_MODELE_FRACTAL_UNIVERSEL
-```
+- [Modèle fractal universel initial](https://github.com/E1LaeTID/Un-modele-fractale-universel)
+- [time2d](https://github.com/E1LaeTID/time2d)
+- [ElementChess](https://github.com/E1LaeTID/elementchess-fractal-poc)
+- [Portail E1LaeTID](https://e1laetid.github.io/)
 
 ## Licence
 
-Ce projet peut être distribué sous licence MIT. Ajoutez un fichier `LICENSE` avant la publication publique du repository.
-
+Distribué sous licence **MIT**. Consultez [LICENSE](LICENSE).
